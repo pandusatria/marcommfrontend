@@ -31,7 +31,7 @@ class login extends Component {
     return (
       <div className="login-box">
         <div className="login-box-body">
-              <p className="login-box-msg">Sign in to start your session on SuPro APP</p>
+              <p className="login-box-msg">Sign in to start your session on Marcomm APP</p>
               <form method="post">
                   <div className="form-group has-feedback">
                     <input className="form-control"
