@@ -1,0 +1,10 @@
+{
+    "base_url" : "http://localhost:8000",
+    "endpoints" : {
+        "login" : "/api/user/login"
+    },
+    "secure_key" : {
+        "userdata" : "SECURE_KEY_USERDATA",
+        "token" : "SECURE_KEY_TOKEN"
+    }
+}
