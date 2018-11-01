@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import userapi from '../../handler/user';
-import appconfig from '../../config/app.config.json';
 
 class login extends Component {
   constructor(props) {
