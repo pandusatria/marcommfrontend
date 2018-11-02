@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import user_api from '../../handler/user';
+import appconfig from '../../config/app.config.json';
 
 class login extends Component {
   constructor(props) {
@@ -24,7 +26,32 @@ class login extends Component {
   }
 
   async onSignIn() {
+    this.setState({
+      isRequest: true
+    });
 
+    console.log("Username : " + this.state.formdata.username + ", Password : " + this.state.formdata.password);
+    
+    let result = await user_api.login(this.state.formdata.username, this.state.formdata.password);
+
+    if(result.status === 200)
+    {
+      console.log('Debugger');
+
+      localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
+      localStorage.setItem(appconfig.secure_key.token, result.message.token);
+      console.log("userdata from secure_key : " + localStorage.getItem(appconfig.secure_key.userdata));
+      console.log("token from secure_key : " + localStorage.getItem(appconfig.secure_key.token));
+      this.props.history.push('/dashboard');
+    }
+    else
+    {
+      console.log(result.message);
+    }
+
+    this.setState({
+      isRequest: false
+    });
   }
 
   render() {
