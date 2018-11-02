@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import user_api from '../../handler/user';
+// import user_api from '../../handler/user';
 import appconfig from '../../config/app.config.json';
 
 class login extends Component {
