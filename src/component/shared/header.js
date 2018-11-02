@@ -10,14 +10,14 @@ export default class header extends Component {
     constructor(props) {
         super(props);
         this.onSignOut = this.onSignOut.bind(this);
-        this.userData = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
+        this.userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
         this.username = "";
         this.rolename = "";
 
-        if(this.userData !== null || typeof this.userData !== undefined)
+        if(this.userdata !== null || typeof this.userdata !== undefined)
         {
-            this.username = this.userData.UserName;
-            this.rolename = this.userData.Role;
+            this.username = this.userdata.username;
+            this.rolename = this.userdata.role;
         }
     }
 
@@ -57,7 +57,7 @@ export default class header extends Component {
                                     </li>
                                     <li className="user-footer">
                                         <div className="pull-right">
-                                            <Link className="nav-link" to="" onClick={this.onSignOut}>Sign out</Link>
+                                            <Link className="nav-link btn btn-danger btn-flat" to="" onClick={this.onSignOut}>Sign out</Link>
                                         </div>
                                     </li>
                                 </ul>
