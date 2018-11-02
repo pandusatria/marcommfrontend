@@ -1,12 +1,8 @@
 {
     "base_url" : "http://localhost:8000",
     "endpoints" : {
-<<<<<<< HEAD
-        "login" : "/api/login"
-=======
         "login" : "/api/login",
         "employee" : "/api/employee/"
->>>>>>> 4a4e2d3b0f2f64459d087c8e9c813164b43ca71a
     },
     "secure_key" : {
         "userdata" : "SECURE_KEY_USERDATA",

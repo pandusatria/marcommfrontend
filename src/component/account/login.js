@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-<<<<<<< HEAD
+
 import userapi from '../../handler/user';
-=======
-import user_api from '../../handler/user';
->>>>>>> 4a4e2d3b0f2f64459d087c8e9c813164b43ca71a
 import appconfig from '../../config/app.config.json';
 
 class login extends Component {
@@ -57,9 +54,7 @@ class login extends Component {
     return formIsValid;
   };
 
-  async onSignIn() {
-<<<<<<< HEAD
-      
+  async onSignIn() {      
       this.setState({
         isRequest: true
       });
@@ -92,41 +87,6 @@ class login extends Component {
 
   };
 
-  // async onSignIn() {
-      
-  //     if(this.handleValidation()) {
-  //         this.setState({
-  //             isRequest: true
-  //         });
-
-  //         console.log("OnSignIn clicked");
-
-  //         let result = await userapi.login(this.state.formdata.username, this.state.formdata.password);
-
-  //         if(result.status === 200) {
-  //           console.log("Please wait...");
-
-  //           localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
-  //           localStorage.setItem(appconfig.secure_key.token, result);
-
-  //           console.log(localStorage.getItem(appconfig.secure_key.userdata));
-
-  //           this.props.history.push('/dashboard');
-  //         } else if(result.status === 404) {
-  //           this.setState({
-  //             alert: true
-  //           });
-  //         } else {
-  //           console.log(result.message);
-  //         }
-
-  //         this.setState({
-  //             isRequest: false
-  //         });
-  //     }
-
-  // };
-=======
     this.setState({
       isRequest: true
     });
@@ -154,8 +114,7 @@ class login extends Component {
       isRequest: false
     });
   }
->>>>>>> 4a4e2d3b0f2f64459d087c8e9c813164b43ca71a
-
+  
   render() {
     return (
       <React.Fragment>

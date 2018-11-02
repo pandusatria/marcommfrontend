@@ -16,13 +16,8 @@ export default class header extends Component {
 
         if(this.userdata !== null || typeof this.userdata !== undefined)
         {
-<<<<<<< HEAD
             this.username = this.userdata.username;
             this.rolename = this.userdata.role;
-=======
-            this.username = this.userData.username;
-            this.rolename = this.userData.Role;
->>>>>>> 4a4e2d3b0f2f64459d087c8e9c813164b43ca71a
         }
     }
 
