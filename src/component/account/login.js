@@ -84,35 +84,6 @@ class login extends Component {
       this.setState({
           isRequest: false
       });
-
-  };
-
-    this.setState({
-      isRequest: true
-    });
-
-    console.log("Username : " + this.state.formdata.username + ", Password : " + this.state.formdata.password);
-    
-    let result = await user_api.login(this.state.formdata.username, this.state.formdata.password);
-
-    if(result.status === 200)
-    {
-      console.log('Debugger');
-
-      localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
-      localStorage.setItem(appconfig.secure_key.token, result.message.token);
-      console.log("userdata from secure_key : " + localStorage.getItem(appconfig.secure_key.userdata));
-      console.log("token from secure_key : " + localStorage.getItem(appconfig.secure_key.token));
-      this.props.history.push('/dashboard');
-    }
-    else
-    {
-      console.log(result.message);
-    }
-
-    this.setState({
-      isRequest: false
-    });
   }
   
   render() {
