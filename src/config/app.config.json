@@ -2,7 +2,10 @@
     "base_url" : "http://localhost:8000",
     "endpoints" : {
         "login" : "/api/login",
-        "employee" : "/api/employee/"
+        "employee" : "/api/employee/",
+        "validate" : "/api/validate/",
+        "company" : "/api/company/",
+        "event" : "/api/event/"
     },
     "secure_key" : {
         "userdata" : "SECURE_KEY_USERDATA",

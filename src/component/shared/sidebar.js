@@ -21,6 +21,13 @@ export default class sidebar extends Component {
                                 </span>
                             </a>
                         </li>
+                        <li className="active">
+                            <a href="/event">
+                                <i className="fa fa-th"> </i> <span>Event</span>
+                                <span className="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
                     </ul>
                 </section>
                 <div className="clearfix"></div>
