@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import msouvenirapi from '../../handler/msouvenir';
-import appconfig from '../../config/app.config.json';
+import munitapi from '../../handler/unit';
+//import appconfig from '../../config/app.config.json';
+
 
 class EditMSouvenir extends Component {
     constructor (props){
@@ -11,12 +13,31 @@ class EditMSouvenir extends Component {
                 code:'',
                 name: '',
                 m_unit_id: '',
+                unit: '',
                 description: ''
-            }
+            },
+            errors: {},
+            munit: []
         };
 
+        this.resetForm=this.resetForm.bind(this);
         this.updateHandler=this.updateHandler.bind(this);
         this.textChanged = this.textChanged.bind(this);
+        this.GetAllUnit = this.GetAllUnit.bind(this);
+        this.handleValidation = this.handleValidation.bind(this);
+    }
+
+    resetForm() {
+        this.setState({
+            formdata:{
+                code:'',
+                name: '',
+                m_unit_id: '',
+                unit: '',
+                description: ''
+            },
+            errors: {}
+        });
     }
 
     textChanged(e) {
@@ -27,32 +48,75 @@ class EditMSouvenir extends Component {
         });
     }
 
+    async GetAllUnit() {
+        let result = await munitapi.GetAllUnit();
 
-    async updateHandler() {
-        //let token = localStorage.getItem(appconfig.secure_key.token);
-        console.log(this.state.formdata);
-        let result = await msouvenirapi.Update(this.state.formdata);
-
-        alert(this.state.formdata._id + this.state.formdata.code);
         if(result.status === 200)
         {
-            console.log('Souvenir - Index.js Debugger');
+            console.log('Master Unit - Index.js Debugger');
             console.log(result.message);
-            document.getElementById("hidePopUpBtnUpdt").click();
-            this.props.modalStatus(1, 'Success');
+            this.setState({
+                munit: result.message
+            });
+            console.log(this.state.munit)
         }
         else
         {
             console.log(result.message);
-            document.getElementById("hidePopUpBtnUpdt").click();
-            this.props.modalStatus(2, 'Failed'); 
         }
     }
+
+    componentDidMount(){
+        this.GetAllUnit();
+    }
+
+    handleValidation(){
+        let fields = this.state.formdata;
+        let errors = {};
+        let formIsValid = true;
+        
+        if(typeof fields.name === "undefined" || fields.name === null || fields.name === ""){
+            formIsValid = false;
+            errors.err_name = "Souvenir Name is empty!";
+        }
+
+        this.setState({errors: errors});
+        return formIsValid;
+    }
+
+    async updateHandler() {
+        if(this.handleValidation()){
+            //let token = localStorage.getItem(appconfig.secure_key.token);
+            console.log(this.state.formdata);
+            let result = await msouvenirapi.Update(this.state.formdata);
+
+            //alert(this.state.formdata._id + this.state.formdata.code);
+
+            if(result.status === 200)
+            {
+                console.log('Souvenir - Index.js Debugger');
+                console.log(result.message);
+                document.getElementById("hidePopUpBtnUpdt").click();
+                this.props.modalStatus(3, 'Success', this.props.msouvenir.code);
+            }
+            else
+            {
+                console.log(result.message);
+                document.getElementById("hidePopUpBtnUpdt").click();
+                this.props.modalStatus(0, 'Failed'); 
+            }
+        }
+    }
+
+    // submitHandler(){
+    //     let token = localStorage.getItem(appconfig.secure_key.token);
+    //     console.log(this.state.formdata);
+    // }
 
     componentWillReceiveProps(newProps) {
         console.log(newProps);
         this.setState({
-            formdata : newProps.client
+            formdata : newProps.msouvenir
         });
     }
 
@@ -60,7 +124,7 @@ class EditMSouvenir extends Component {
         return (
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="hidePopUpBtnUpdt" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button id="hidePopUpBtnUpdt" onClick = { this.resetForm } type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
                     <h4 className="modal-title">Edit Souvenir - {this.props.msouvenir.name} ({this.props.msouvenir.code})</h4>
                 </div>
@@ -69,30 +133,40 @@ class EditMSouvenir extends Component {
                     <div className="box-body">
                         <div class="row">
                             <div class="col-md-6"> 
-                                <div class="form-group">
+                                <div className="form-group">
                                     <label for="text">*Souvenir Code</label>
                                     <input type="text" class="form-control" value={this.props.msouvenir.code} disabled/>
                                 </div>
                                 <div class="form-group">
                                     <label for="text">*Souvenir Name</label>
-                                    <input type="text" class="form-control" value={this.props.msouvenir.name} ></input>
+                                    <input name="name" ref="name" style= {{ marginTop : '10px'}} className="form-control" value={this.state.formdata.name}  onChange={this.textChanged} ></input>
+                                    <span style={{color: "red"}}>{this.state.errors.err_name}</span>
                                 </div>
                             </div>
                             <div class="col-md-6"> 
-                                <div class="form-group">
+                                <div className="form-group">
                                     <label for="text">*Unit Name</label>
-                                    <input type="text" class="form-control" value={this.props.msouvenir.m_unit_id} disabled/>
+                                    <div className="col-sm-9">
+                                        <select value={this.state.formdata.unit} className="form-control" id="m_unit_id" name="m_unit_id" onChange={this.textChanged} >
+                                            <option value="0"> - Select Unit Name -</option>
+                                            {
+                                                this.state.munit.map((elemen) =>
+                                                    <option key={elemen._id} value={elemen._id}> {elemen.name} </option>
+                                                )
+                                            }
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="text">Description</label>
-                                    <input type="text" class="form-control" value={this.props.msouvenir.description} disabled/>
+                                    <input name="description" ref="description" style= {{ marginTop : '10px'}} className="form-control" value={this.state.formdata.description}  onChange={this.textChanged} ></input>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-warning pull-right" data-dismiss="modal">Cancel</button>
+                        <button type="button" className="btn btn-warning pull-right" onClick={ this.resetForm } data-dismiss="modal">Cancel</button>
                         <button type="button" className="btn btn-primary" onClick = {this.updateHandler} style={{marginRight : '5px'}}>Update</button>
                     </div>
                 </form>

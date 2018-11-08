@@ -21,6 +21,20 @@ export default class sidebar extends Component {
                                 </span>
                             </a>
                         </li>
+                        <li className="active">
+                            <a href="/souvenir">
+                                <i className="fa fa-th"> </i> <span>Souvenir</span>
+                                <span className="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+                        <li className="active">
+                            <a href="/tsouvenir">
+                                <i className="fa fa-th"> </i> <span>Transaction Souvenir</span>
+                                <span className="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
                     </ul>
                 </section>
                 <div className="clearfix"></div>

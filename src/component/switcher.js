@@ -3,6 +3,8 @@ import { Switch, Route } from 'react-router-dom';
 import { Redirect } from 'react-router';
 import Dashboard from './home/dashboard';
 import Employee from './employee/index';
+import MSouvenir from './m_souvenir/Index';
+import TSouvenir from './t_souvenir/Index';
 import appconfig from '../config/app.config.json';
 import tokenExpired from '../common/checkTokenExpired';
 
@@ -11,6 +13,8 @@ const Switcher = () => {
         <Switch>
             <PrivateRoute path = "/dashboard" component = { Dashboard } />
             <PrivateRoute path = "/employee" component = { Employee } />
+            <PrivateRoute path = "/souvenir" component = { MSouvenir } />
+            <PrivateRoute path = "/tsouvenir" component = { TSouvenir } />
 
         </Switch>
     )

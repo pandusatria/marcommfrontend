@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import msouvenirapi from '../../handler/msouvenir';
+import munitapi from '../../handler/unit';
+import AutoGen from '../../common/autoGenerateNumber';
 import appconfig from '../../config/app.config.json';
 
 class CreateMSouvenir extends Component{
@@ -13,19 +15,55 @@ class CreateMSouvenir extends Component{
                 m_unit_id: '',
                 description: ''
             },
-            errors: {}
+            errors: {},
+            munit: []
         };
 
         this.submitHandler=this.submitHandler.bind(this);
         this.resetForm=this.resetForm.bind(this);
         this.textChanged = this.textChanged.bind(this);
-        //this.handleValidation = this.handleValidation.bind(this);
+        this.handleValidation = this.handleValidation.bind(this);
+        this.GetAllUnit = this.GetAllUnit.bind(this);
+        this.autoGenSouvenir = this.autoGenSouvenir.bind(this);
+    }
+
+    async autoGenSouvenir() {
+        let result = await AutoGen.createCodeSouvenir();
+        console.log("autoGenSupplier");
+        console.log(result);
+        this.setState({
+            formdata:{
+                code: result
+            }
+        });
+    }
+
+    async GetAllUnit() {
+        let result = await munitapi.GetAllUnit();
+
+        if(result.status === 200)
+        {
+            console.log('Master Unit - Index.js Debugger');
+            console.log(result.message);
+            this.setState({
+                munit: result.message
+            });
+            console.log(this.state.munit)
+        }
+        else
+        {
+            console.log(result.message);
+        }
+    }
+
+    componentDidMount(){
+        this.GetAllUnit();
+        this.autoGenSouvenir();
     }
 
     resetForm() {
         this.setState({
             formdata:{
-                code:'',
                 name: '',
                 m_unit_id: '',
                 description: ''
@@ -34,33 +72,71 @@ class CreateMSouvenir extends Component{
         });
     }
 
+    // resetFormSuccess() {
+    //     this.setState({
+    //         formdata:{
+    //             code: '',
+    //             name: '',
+    //             m_unit_id: '',
+    //             description: ''
+    //         },
+    //         errors: {}
+    //     });
+    // }
+
     textChanged(e) {
         let tmp = this.state.formdata;
         tmp[e.target.name] = e.target.value;
         this.setState({
             formdata: tmp
         });
+        console.log(this.state.formdata)
     }
+
+    handleValidation(){
+        let fields = this.state.formdata;
+        let errors = {};
+        let formIsValid = true;
+        
+        if(typeof fields.name === "undefined" || fields.name === null || fields.name === ""){
+            formIsValid = false;
+            errors.err_name = "Souvenir Name is empty!";
+        }
+
+        this.setState({errors: errors});
+        return formIsValid;
+    }
+
     
     async submitHandler(){
         
-        // if(this.handleValidation()){
-        //     let token = localStorage.getItem(appconfig.secure_key.token);
-        //     console.log(this.state.formdata);
-
+        if(this.handleValidation()){
+            let token = localStorage.getItem(appconfig.secure_key.token);
+        
+        
+            console.log(this.state.formdata)
             let result = await msouvenirapi.insertNew(this.state.formdata);
-  
-            if(result.status === 200){
+            
+            if(result.status === 200)
+            {
+                console.log('Souvenir - Index.js Debugger');
                 console.log(result.message);
+                var scode = this.state.formdata.code
                 document.getElementById("hidePopUpBtn").click();
-                this.props.modalStatus(1, 'Success');
-            } else {
+                this.props.modalStatus(2, 'Success', scode);
+                //this.autoGenSouvenir();
+            } 
+            else 
+            {
                 console.log(result.message);
                 document.getElementById("hidePopUpBtn").click();
                 this.props.modalStatus(0, 'Failed');
+                // this.autoGenSouvenir();
             }
-        // }
+            this.autoGenSouvenir();
+        }
     };
+    
 
     render(){
         return(
@@ -79,7 +155,7 @@ class CreateMSouvenir extends Component{
                                 <div className="form-group">
                                     <label className="col-sm-3 control-label">*Souvenir Code</label>
                                     <div className="col-sm-9">
-                                        <input ref="code" type="text" className="form-control" name="code" placeholder="Auto Generate" value={ this.state.formdata.code } onChange={ this.textChanged }></input>
+                                        <input ref="code" type="text" className="form-control" name="code" placeholder="Auto Generate" value={ this.state.formdata.code } disabled />
                                         <span style={{color: "red"}}>{this.state.errors.code}</span>
                                     </div> 
                                 </div>
@@ -88,7 +164,7 @@ class CreateMSouvenir extends Component{
                                     <label className="col-sm-3 control-label">*Souvenir Name</label>
                                     <div className="col-sm-9">
                                         <input ref="name" type="text" className="form-control" name="name" placeholder="Type Souvenir Name" value={ this.state.formdata.name } onChange={ this.textChanged }></input>
-                                        <span style={{color: "red"}}>{this.state.errors.name}</span>
+                                        <span style={{color: "red"}}>{this.state.errors.err_name}</span>
                                     </div> 
                                 </div>
                             </div>
@@ -96,7 +172,14 @@ class CreateMSouvenir extends Component{
                                 <div className="form-group">
                                     <label className="col-sm-3 control-label">*Unit Name</label>
                                     <div className="col-sm-9">
-                                        <input ref="m_unit_id" type="dropdown" className="form-control" name="m_unit_id" placeholder="- Select Unit Name -" value={ this.state.formdata.m_unit_id } onChange={ this.textChanged }></input>
+                                        <select className="form-control" id="m_unit_id" name="m_unit_id" onChange={this.textChanged} >
+                                            <option value="0"> - Select Unit Name -</option>
+                                            {
+                                                this.state.munit.map((elemen) =>
+                                                    <option key={elemen._id} value={elemen._id}> {elemen.name} </option>
+                                                )
+                                            }
+                                        </select>
                                         <span style={{color: "red"}}>{this.state.errors.m_unit_id}</span>
                                     </div> 
                                 </div>

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import msouvenirapi from '../../handler/msouvenir';
+import AutoGen from '../../common/autoGenerateNumber';
 
 class DeleteMSouvenir extends Component{
     constructor (props){
@@ -15,28 +16,45 @@ class DeleteMSouvenir extends Component{
         };
 
         this.deleteHandler=this.deleteHandler.bind(this);
+        //this.autoGenSouvenir = this.autoGenSouvenir.bind(this);
 
     }
+
+    // async autoGenSouvenir() {
+    //     let result = await AutoGen.createCodeSouvenir();
+    //     console.log("autoGenSupplier");
+    //     console.log(result);
+    //     this.setState({
+    //         formdata:{
+    //             code: result
+    //         }
+    //     });
+    // }
+
+    // componentDidMount(){
+    //     this.autoGenSouvenir();
+    // }
 
     async deleteHandler() {
         //let token = localStorage.getItem(appconfig.secure_key.token);
         console.log(this.state.formdata);
         let result = await msouvenirapi.Delete(this.props.msouvenir._id);
 
-        alert(this.state.formdata._id + this.state.formdata.code);
+        //alert(this.state.formdata._id + this.state.formdata.code);
         if(result.status === 200)
         {
             console.log('Souvenir - Index.js Debugger');
             console.log(result.message);
             document.getElementById("hidePopUpBtnDel").click();
-            this.props.modalStatus(1, 'Success');
+            this.props.modalStatus(1, 'Success', this.props.msouvenir.code);
         }
         else
         {
             console.log(result.message);
             document.getElementById("hidePopUpBtnDel").click();
-            this.props.modalStatus(2, 'Failed'); 
+            this.props.modalStatus(0, 'Failed'); 
         }
+        //this.autoGenSouvenir();
     }
 
     // componentWillReceiveProps(newProps) {

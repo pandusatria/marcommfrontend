@@ -11,13 +11,19 @@ export default class header extends Component {
         super(props);
         this.onSignOut = this.onSignOut.bind(this);
         this.userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
-        this.username = "";
-        this.rolename = "";
 
-        if(this.userdata !== null || typeof this.userdata !== undefined)
+        console.log(this.userdata);
+        if(this.userdata == null || typeof this.userdata == undefined)
         {
-            this.username = this.userdata.username;
-            this.rolename = this.userdata.role;
+            this.username = "";
+            this.role = "";
+            this.email = "";
+            this.employee = "";
+        } else {
+            this.username = this.userdata[0].username;
+            this.role = this.userdata[0].role;
+            this.employee = this.userdata[0].employee;
+            this.email = this.userdata[0].email;
         }
     }
 
@@ -44,7 +50,7 @@ export default class header extends Component {
                                 <a href="#" className="dropdown-toggle" data-toggle="dropdown">
                                     <img src={require("../../content/img/avatar.png")} className="user-image" alt="User Image"/>
                                     <span className="hidden-xs">
-                                        {this.username}
+                                        { this.email }
                                     </span>
                                 </a>
                                 <ul className="dropdown-menu">
@@ -52,7 +58,7 @@ export default class header extends Component {
                                         <img src={require("../../content/img/avatar.png")} className="img-circle" alt="User Image"/>
 
                                         <p>
-                                            {this.username} - {this.rolename}
+                                            { this.employee } - { this.role }
                                         </p>
                                     </li>
                                     <li className="user-footer">
