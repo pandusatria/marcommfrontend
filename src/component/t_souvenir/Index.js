@@ -7,8 +7,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import tsouvenirapi from '../../handler/tsouvenir';
 import employee_api from '../../handler/employee';
 import CreateTSouvenir from './Create';
+import DetailTSouvenir from './Detail';
 //import DeleteTSouvenir from './Delete';
-// import DetailMSouvenir from './Detail';
 // import EditMSouvenir from './Edit';
 
 class Index extends Component {
@@ -33,11 +33,13 @@ class Index extends Component {
             },
             createdDate: '',
             receivedDate: '',
-            //memployee : []
+            memployee : [],
+            msouvenir : [],
+            currentmsouvenir: {}
         };
 
         this.GetAll = this.GetAll.bind(this);
-        // this.viewModalHandler = this.viewModalHandler.bind(this);
+        this.viewModalHandler = this.viewModalHandler.bind(this);
         // this.deleteModalHandler = this.deleteModalHandler.bind(this);
         // this.editModalHandler = this.editModalHandler.bind(this);
         this.modalStatus = this.modalStatus.bind(this);
@@ -46,7 +48,7 @@ class Index extends Component {
         this.textHandler = this.textHandler.bind(this);
         this.handleChangeDate = this.handleChangeDate.bind(this);
         this.handleChangeDateRcBy = this.handleChangeDateRcBy.bind(this);
-        //this.GetAllEmployee = this.GetAllEmployee.bind(this);
+        this.GetAllEmployee = this.GetAllEmployee.bind(this);
     }
 
     handleChangeDate(date){
@@ -185,43 +187,52 @@ class Index extends Component {
         }
     }
 
-    // async GetAllEmployee() {
-    //     let result = await employee_api.GetAll();
+    async GetAllEmployee() {
+        let result = await employee_api.GetAll();
 
-    //     if(result.status === 200)
-    //     {
-    //         console.log('Master Employee - Index.js Debugger');
-    //         console.log(result.message);
-    //         this.setState({
-    //             memployee: result.message
-    //         });
-    //         console.log(this.state.memployee)
-    //     }
-    //     else
-    //     {
-    //         console.log(result.message);
-    //     }
-    // }
+        if(result.status === 200)
+        {
+            console.log('Master Employee - Index.js Debugger');
+            console.log(result.message);
+            this.setState({
+                memployee: result.message
+            });
+            console.log(this.state.memployee)
+        }
+        else
+        {
+            console.log(result.message);
+        }
+    }
 
     componentDidMount(){
         this.GetAll();
-        //this.GetAllEmployee();
+        this.GetAllEmployee();
     }
 
 
-    // viewModalHandler(tsouvenirid) {
-    //     let tmp = {};
+    viewModalHandler(tsouvenirid, msouvenirid) {
+        let tmp = {};
+        let xmp = {};
 
-    //     this.state.tsouvenir.map((ele) => {
-    //         if (tsouvenirid === ele._id) {
-    //             tmp = ele;
-    //         }
-    //     });
+        this.state.tsouvenir.map((ele) => {
+            if (tsouvenirid === ele._id) {
+                tmp = ele;
+            }
+        });
 
-    //     this.setState({
-    //         currenttsouvenir : tmp
-    //     });
-    // };
+        this.state.msouvenir.map((ele => {
+            if (msouvenirid === ele._id) {
+                xmp = ele;
+            }
+        }))
+
+        this.setState({
+            currenttsouvenir : tmp,
+            currentmsouvenir : xmp
+
+        });
+    };
 
     // editModalHandler(tsouvenirid){
     //     let obj = {};
@@ -367,8 +378,8 @@ class Index extends Component {
                                             <select className="form-control" id="name_receiver" name="name_receiver" value={this.state.formdata.name_receiver} onChange={this.textHandler}>
                                                 <option value="" > Received By </option>
                                                 {
-                                                    this.state.tsouvenir.map((ele, x) => 
-                                                        <option key={ele.name} value={ele.name}> {ele.name} </option>
+                                                    this.state.memployee.map((ele, x) => 
+                                                        <option key={ele.employee_name} value={ele.employee_name}> {ele.employee_name} </option>
                                                     )
                                                 }
                                             </select>
@@ -455,13 +466,14 @@ class Index extends Component {
                         </div>
                     </div>
                 </section>
-                {/* <div className="modal fade" id="modal-view">
+                <div className="modal fade" id="modal-view">
                     <div className="modal-dialog">
-                            <Detailtsouvenir
+                            <DetailTSouvenir
                                 tsouvenir = {this.state.currenttsouvenir}
+                                msouvenir = {this.state.currentmsouvenir}
                             />
                     </div>
-                </div> */}
+                </div>
                 <div className="modal fade" id="modal-create">
                     <div className="modal-dialog">
                             <CreateTSouvenir

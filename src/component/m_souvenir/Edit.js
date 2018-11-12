@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import msouvenirapi from '../../handler/msouvenir';
 import munitapi from '../../handler/unit';
-//import appconfig from '../../config/app.config.json';
-
+import appconfig from '../../config/app.config.json';
 
 class EditMSouvenir extends Component {
     constructor (props){
@@ -13,7 +12,6 @@ class EditMSouvenir extends Component {
                 code:'',
                 name: '',
                 m_unit_id: '',
-                unit: '',
                 description: ''
             },
             errors: {},
@@ -75,9 +73,19 @@ class EditMSouvenir extends Component {
         let errors = {};
         let formIsValid = true;
         
+        // if(typeof fields.code === "undefined" || fields.code === null || fields.code === ""){
+        //     formIsValid = false;
+        //     errors.err_code = "Souvenir Code is empty!";
+        // }
+        
         if(typeof fields.name === "undefined" || fields.name === null || fields.name === ""){
             formIsValid = false;
             errors.err_name = "Souvenir Name is empty!";
+        }
+
+        if(typeof fields.m_unit_id === "undefined" || fields.m_unit_id === null || fields.m_unit_id === ""){
+            formIsValid = false;
+            errors.err_m_unit_id = "Unit Name is empty!";
         }
 
         this.setState({errors: errors});
@@ -85,8 +93,8 @@ class EditMSouvenir extends Component {
     }
 
     async updateHandler() {
+        let token = localStorage.getItem(appconfig.secure_key.token);
         if(this.handleValidation()){
-            //let token = localStorage.getItem(appconfig.secure_key.token);
             console.log(this.state.formdata);
             let result = await msouvenirapi.Update(this.state.formdata);
 
@@ -97,7 +105,7 @@ class EditMSouvenir extends Component {
                 console.log('Souvenir - Index.js Debugger');
                 console.log(result.message);
                 document.getElementById("hidePopUpBtnUpdt").click();
-                this.props.modalStatus(3, 'Success', this.props.msouvenir.code);
+                this.props.modalStatus(3, 'Success');
             }
             else
             {
@@ -124,7 +132,7 @@ class EditMSouvenir extends Component {
         return (
             <div class="modal-content">
                 <div class="modal-header">
-                    <button id="hidePopUpBtnUpdt" onClick = { this.resetForm } type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button id="hidePopUpBtnUpdt" type="button" className="close" data-dismiss="modal" aria-label="Close" onClick = { this.resetForm }>
                     <span aria-hidden="true">&times;</span></button>
                     <h4 className="modal-title">Edit Souvenir - {this.props.msouvenir.name} ({this.props.msouvenir.code})</h4>
                 </div>
@@ -147,7 +155,7 @@ class EditMSouvenir extends Component {
                                 <div className="form-group">
                                     <label for="text">*Unit Name</label>
                                     <div className="col-sm-9">
-                                        <select value={this.state.formdata.unit} className="form-control" id="m_unit_id" name="m_unit_id" onChange={this.textChanged} >
+                                        <select className="form-control" id="m_unit_id" name="m_unit_id" onChange={this.textChanged} value={this.state.formdata.m_unit_id} >
                                             <option value="0"> - Select Unit Name -</option>
                                             {
                                                 this.state.munit.map((elemen) =>
@@ -155,6 +163,7 @@ class EditMSouvenir extends Component {
                                                 )
                                             }
                                         </select>
+                                        <span className="help-block" style={{color: "red"}}>{this.state.errors.err_m_unit_id}</span>
                                     </div>
                                 </div>
                                 <div class="form-group">

@@ -27,7 +27,7 @@ class Index extends Component {
             formdata: {
                 code: '',
                 name: '',
-                m_unit_id: '',
+                name_unit: '',
                 unit:'',
                 created_date: '',
                 created_by: '' 
@@ -72,15 +72,15 @@ class Index extends Component {
         console.log("search" + this.state.formdata);
         console.log(this.state.formdata.code);
         console.log(this.state.formdata.name);
-        console.log(this.state.formdata.unit);
+        console.log(this.state.formdata.name_unit);
         //console.log(this.state.formdata.created_by)
-        console.log(this.state.createdDate._d);
+        console.log(this.state.createdDate);
         console.log(this.state.formdata.created_by);
 
         let SouvenirCode = this.state.formdata.code;
         let SouvenirName = this.state.formdata.name;
-        let UnitName = this.state.formdata.m_unit_id;
-        let CreatedDate = moment(this.state.createdDate._d).format("YYYY-MM-DD");
+        let UnitName = this.state.formdata.name_unit;
+        let CreatedDate = moment(this.state.createdDate).format("YYYY-MM-DD");
         let CreatedBy = this.state.formdata.created_by;
 
         query.push({
@@ -108,12 +108,12 @@ class Index extends Component {
             });
         }
 
-        if(this.state.formdata.m_unit_id === '' || this.state.formdata.m_unit_id === null || typeof this.state.formdata.m_unit_id === undefined || this.state.formdata.m_unit_id === undefined) { 
+        if(this.state.formdata.name_unit === '' || this.state.formdata.name_unit === null || typeof this.state.formdata.name_unit === undefined || this.state.formdata.name_unit === undefined) { 
         } 
         else
         {
             query.push({
-                "id" : "m_unit_id",
+                "id" : "name_unit",
                 "value" : UnitName
             });
         }
@@ -128,7 +128,7 @@ class Index extends Component {
             });
         }
 
-        if(this.state.createdDate._d === '' || this.state.createdDate._d === null || typeof this.state.createdDate._d === undefined || this.state.createdDate._d === undefined) {
+        if(this.state.createdDate === '' || this.state.createdDate === null || typeof this.state.createdDate === undefined || this.state.createdDate === undefined) {
         } 
         else
         {
@@ -355,7 +355,7 @@ class Index extends Component {
                                             <input type="text" className="form-control" placeholder="Souvenir Name" id="name" name="name" value={this.state.formdata.name} onChange={this.textHandler} />
                                         </div>
                                         <div className="col-md-2">
-                                            <select className="form-control" id="m_unit_id" name="m_unit_id" value={this.state.formdata.m_unit_id} onChange={this.textHandler}>
+                                            <select className="form-control" id="name_unit" name="name_unit" value={this.state.formdata.name_unit} onChange={this.textHandler}>
                                                 <option value=""> - Select Unit Name - </option>
                                                 {
                                                     this.state.munit.map((ele, x) => 
@@ -414,7 +414,7 @@ class Index extends Component {
                                                         {/* <td>{ele._id}</td> */}
                                                         <td>{ele.code}</td>
                                                         <td>{ele.name}</td>
-                                                        <td>{ele.m_unit_id}</td>
+                                                        <td>{ele.name_unit}</td>
                                                         <td>{moment (ele.created_date).format("DD/MM/YYYY")}</td>
                                                         <td>{ele.created_by}</td>
                                                         <td>

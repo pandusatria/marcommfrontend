@@ -26,7 +26,7 @@ class DetailMSouvenir extends Component{
                             <div class="col-md-6"> 
                                 <div class="form-group">
                                     <label for="text">*Unit Name</label>
-                                    <input type="text" class="form-control" value={this.props.msouvenir.m_unit_id} disabled/>
+                                    <input type="text" class="form-control" value={this.props.msouvenir.name_unit} disabled/>
                                 </div>
                                 <div class="form-group">
                                     <label for="text">Description</label>
