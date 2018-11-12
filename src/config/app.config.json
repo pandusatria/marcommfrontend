@@ -2,7 +2,15 @@
     "base_url" : "http://localhost:8000",
     "endpoints" : {
         "login" : "/api/login",
-        "employee" : "/api/employee/"
+        "employee" : "/api/employee/",
+        "user" : "/api/user/",
+        "role" : "/api/role/",
+        "company" : "/api/company/",
+        "validate" : "/api/validate/",
+        "souvenir" : "/api/souvenir/",
+        "tsouvenir" : "/api/tsouvenir/",
+        "souvenir_item" : "/api/tsitem/",
+        "event" : "/api/event/"
     },
     "secure_key" : {
         "userdata" : "SECURE_KEY_USERDATA",

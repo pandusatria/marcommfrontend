@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-
 import userapi from '../../handler/user';
 import appconfig from '../../config/app.config.json';
 
@@ -17,8 +16,9 @@ class login extends Component {
     };
 
     this.textChanged = this.textChanged.bind(this);
-    //this.handleValidation = this.handleValidation.bind(this);
+    this.handleValidation = this.handleValidation.bind(this);
     this.onSignIn = this.onSignIn.bind(this);
+    this.alertDissmis = this.alertDissmis.bind(this);
   };
 
   textChanged(e) {
@@ -41,80 +41,65 @@ class login extends Component {
       formIsValid = false;
       errors.username = "username must be contain letter and number, length minimal 8"
     }
-
+    
     if(!fields.password) {
       formIsValid = false;
       errors.password = "password cannot be empty";
-    } else if(!fields.username.match(/^(?=.*\d).{8,}$/)) {
+    } else if(!fields.password.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/)) {
+      // regex uppercase, letter and number minimal 8
+      // (?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/)
       formIsValid = false;
-      errors.password = "password must be contain letter and number, length minimal 8"
+      errors.password = "password must be contain uppercase, letter and number, length minimal 8"
     }
 
     this.setState({errors: errors});
     return formIsValid;
   };
 
-  async onSignIn() {      
-      this.setState({
-        isRequest: true
-      });
+  alertDissmis() {
+    this.setState({
+      alert: true
+    });
+  }
 
-      console.log("OnSignIn clicked");
+  async onSignIn() {
+      
+      if(this.handleValidation()) {
+          this.setState({
+              isRequest: true
+          });
 
-      let result = await userapi.login(this.state.formdata.username, this.state.formdata.password);
+          console.log("OnSignIn clicked");
 
-      if(result.status === 200) {
-        console.log("Please wait...");
+          let result = await userapi.login(this.state.formdata.username, this.state.formdata.password);
 
-        localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
-        localStorage.setItem(appconfig.secure_key.token, result);
+          if(result.status === 200) {
+            console.log("Please wait...");
 
-        console.log(localStorage.getItem(appconfig.secure_key.userdata));
+            localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
+            localStorage.setItem(appconfig.secure_key.token, result.message.token);
 
-        this.props.history.push('/dashboard');
-      } else if(result.status === 404) {
-        console.log("password error");
-        this.setState({
-          alert: true
-        });
-      } else {
-        console.log(result.message);
+            console.log(localStorage.getItem(appconfig.secure_key.userdata));
+
+            this.props.history.push('/dashboard');
+          } else if(result.status === 404) {
+            this.setState({
+              alert: true
+            });
+          } else {
+            console.log(result.message);
+            this.setState({
+              alert: true
+            });
+          }
+
+          this.setState({
+              isRequest: false
+          });
       }
-
-      this.setState({
-          isRequest: false
-      });
 
   };
 
-    this.setState({
-      isRequest: true
-    });
-
-    console.log("Username : " + this.state.formdata.username + ", Password : " + this.state.formdata.password);
-    
-    let result = await user_api.login(this.state.formdata.username, this.state.formdata.password);
-
-    if(result.status === 200)
-    {
-      console.log('Debugger');
-
-      localStorage.setItem(appconfig.secure_key.userdata, JSON.stringify(result.message.userdata));
-      localStorage.setItem(appconfig.secure_key.token, result.message.token);
-      console.log("userdata from secure_key : " + localStorage.getItem(appconfig.secure_key.userdata));
-      console.log("token from secure_key : " + localStorage.getItem(appconfig.secure_key.token));
-      this.props.history.push('/dashboard');
-    }
-    else
-    {
-      console.log(result.message);
-    }
-
-    this.setState({
-      isRequest: false
-    });
-  }
-  
   render() {
     return (
       <React.Fragment>
@@ -139,7 +124,7 @@ class login extends Component {
                       value={ this.state.username } 
                       onChange={ this.textChanged } />
                     <span className="glyphicon glyphicon-envelope form-control-feedback"></span>
-                    {/* <span style={{color: "red"}}>{this.state.errors.username}</span> */}
+                    <span style={{color: "red"}}>{this.state.errors.username}</span>
                   </div>
                   <div className="form-group has-feedback">
                     <input 
@@ -153,7 +138,7 @@ class login extends Component {
                       onChange={ this.textChanged }
                     />
                     <span className="glyphicon glyphicon-lock form-control-feedback"></span>
-                    {/* <span style={{color: "red"}}>{this.state.errors.password}</span> */}
+                    <span style={{color: "red"}}>{this.state.errors.password}</span>
                   </div>
                   <div className="row">
                     <div className="col-xs-4">
