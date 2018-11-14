@@ -6,10 +6,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import tsouvenirapi from '../../handler/tsouvenir';
 import employee_api from '../../handler/employee';
+import tsitemapi from '../../handler/souvenir_item'
 import CreateTSouvenir from './Create';
 import DetailTSouvenir from './Detail';
 //import DeleteTSouvenir from './Delete';
-// import EditMSouvenir from './Edit';
+import EditTSouvenir from './Edit';
 
 class Index extends Component {
     constructor(props) {
@@ -17,6 +18,13 @@ class Index extends Component {
         this.state = {
             tsouvenir : [],
             currenttsouvenir: {},
+            DetailSouvenir : [{
+                id     :  "",
+                m_souvenir_id: "",
+                qty     :  "",
+                note    :  ""
+            }],
+            currDetail: {},
             alertData: {
                 status: 99,
                 message: '',
@@ -29,19 +37,23 @@ class Index extends Component {
                 name_receiver: '',
                 received_date: '',
                 created_date: '',
-                created_by: '' 
+                created_by: ''
             },
             createdDate: '',
             receivedDate: '',
             memployee : [],
+            currentmemployee: {},
+            tsitem: [],
+            currenttsitem: {},
             msouvenir : [],
-            currentmsouvenir: {}
+            currentmsouvenir: {},
+
         };
 
         this.GetAll = this.GetAll.bind(this);
         this.viewModalHandler = this.viewModalHandler.bind(this);
         // this.deleteModalHandler = this.deleteModalHandler.bind(this);
-        // this.editModalHandler = this.editModalHandler.bind(this);
+        this.editModalHandler = this.editModalHandler.bind(this);
         this.modalStatus = this.modalStatus.bind(this);
         this.onAlertDismissed = this.onAlertDismissed.bind(this);
         this.searchSouvenir = this.searchSouvenir.bind(this);
@@ -49,6 +61,7 @@ class Index extends Component {
         this.handleChangeDate = this.handleChangeDate.bind(this);
         this.handleChangeDateRcBy = this.handleChangeDateRcBy.bind(this);
         this.GetAllEmployee = this.GetAllEmployee.bind(this);
+        this.GetAllTSItem = this.GetAllTSItem.bind(this);
     }
 
     handleChangeDate(date){
@@ -76,8 +89,6 @@ class Index extends Component {
             formdata: tmp
         });
     }
-
-    
 
     async searchSouvenir(){
         var query = [];
@@ -205,15 +216,28 @@ class Index extends Component {
         }
     }
 
-    componentDidMount(){
-        this.GetAll();
-        this.GetAllEmployee();
+    async GetAllTSItem() {
+        let result = await tsitemapi.GetAll();
+
+        if(result.status === 200)
+        {
+            console.log('Master Employee - Index.js Debugger');
+            console.log(result.message);
+            this.setState({
+                tsitem: result.message
+            });
+            console.log(this.state.tsitem)
+        }
+        else
+        {
+            console.log(result.message);
+        }
     }
 
-
-    viewModalHandler(tsouvenirid, msouvenirid) {
+    viewModalHandler(tsouvenirid) {
         let tmp = {};
-        let xmp = {};
+        //let xmp = {};
+        //let tsi = {};
 
         this.state.tsouvenir.map((ele) => {
             if (tsouvenirid === ele._id) {
@@ -221,32 +245,47 @@ class Index extends Component {
             }
         });
 
-        this.state.msouvenir.map((ele => {
-            if (msouvenirid === ele._id) {
-                xmp = ele;
-            }
-        }))
+        // this.state.DetailSouvenir.map((ele => {
+        //     if (detailID === ele._id) {
+        //         xmp = ele;
+        //     }
+        // }));
 
         this.setState({
             currenttsouvenir : tmp,
-            currentmsouvenir : xmp
+            //currDetail : xmp,
+            //currenttsitem : tsi
+
 
         });
+        console.log("Klik Edit");
+        console.log(this.props.history);
+        localStorage.setItem('idTsouvenir', tsouvenirid);
+        console.log(localStorage.getItem('idTsouvenir'));
+        this.props.history.push("/tsouvenir/");
     };
 
-    // editModalHandler(tsouvenirid){
-    //     let obj = {};
-    //     this.state.tsouvenir.map((ele) => {
-    //         if(ele._id === tsouvenirid)
-    //         {
-    //             obj = ele;
-    //         }
-    //     });
+    editModalHandler(tsouvenirid){
+        let obj = {};
+        
+        this.state.tsouvenir.map((ele) => {
+            if(ele._id === tsouvenirid)
+            {
+                obj = ele;
+            }
+        });
 
-    //     this.setState({
-    //         currenttsouvenir : obj
-    //     });
-    // };
+        this.setState({
+            
+            currenttsouvenir : obj
+        });
+        // console.log("Klik Edit");
+        // console.log(this.props.history);
+        // localStorage.setItem('idTsouvenir', tsouvenirid);
+        // console.log(localStorage.getItem('idTsouvenir'));
+        // this.props.history.push("/tsouvenir/");
+        
+    };
 
 
     // deleteModalHandler(tsouvenirid){
@@ -324,6 +363,13 @@ class Index extends Component {
             });
         }
     };
+
+    componentDidMount(){
+        this.GetAll();
+        this.GetAllEmployee();
+        this.GetAllTSItem();;
+        localStorage.removeItem('idTsouvenir');
+    }
 
     render() {
         return (
@@ -470,7 +516,8 @@ class Index extends Component {
                     <div className="modal-dialog">
                             <DetailTSouvenir
                                 tsouvenir = {this.state.currenttsouvenir}
-                                msouvenir = {this.state.currentmsouvenir}
+                                //DetailSouvenir = {this.state.currDetail}
+                                //tsitem = {this.state.currenttsitem}
                             />
                     </div>
                 </div>
@@ -482,15 +529,15 @@ class Index extends Component {
                             />
                     </div>
                 </div>
-                {/* <div class="modal fade" id="modal-edit">
+                <div class="modal fade" id="modal-edit">
                     <div class="modal-dialog">
-                        <EditMSouvenir 
-                            msouvenir = {this.state.currentMSouvenir}
+                        <EditTSouvenir 
+                            tsouvenir = {this.state.currenttsouvenir}
                             modalStatus = {this.modalStatus}
                         />
                     </div>
                 </div>
-                <div class="modal fade" id="modal-delete">
+                {/* <div class="modal fade" id="modal-delete">
                     <div class="modal-dialog">
                         <DeleteMSouvenir 
                             msouvenir = {this.state.currentMSouvenir}

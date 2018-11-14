@@ -10,7 +10,7 @@ import tsouvenirapi from '../../handler/tsouvenir';
 import employee_api from '../../handler/employee';
 import msouvenirapi from '../../handler/msouvenir';
 
-class CreateTSouvenir extends Component{
+class EditTSouvenir extends Component{
     idx = 0
     constructor (props){
         super(props);
@@ -21,7 +21,7 @@ class CreateTSouvenir extends Component{
                 name_receiver: '',
                 received_date: '',
                 note: '',
-                formdataStock : [{
+                DetailSouvenir : [{
                     id     :  "",
                     m_souvenir_id: "",
                     qty     :  "",
@@ -31,18 +31,18 @@ class CreateTSouvenir extends Component{
             errors: {},
             receivedDate: '',
             memployee: [],
-
-            msouvenir: []
+            msouvenir: [],
         };
 
         this.textChanged = this.textChanged.bind(this);
         this.handleChangeDateRcBy = this.handleChangeDateRcBy.bind(this);
         this.resetForm=this.resetForm.bind(this);
-        this.autoGenSouvenir = this.autoGenSouvenir.bind(this);
         this.GetAllEmployee = this.GetAllEmployee.bind(this);
         this.GetAllMSouvenir = this.GetAllMSouvenir.bind(this);
         this.handleValidation = this.handleValidation.bind(this);
-        this.submitHandler=this.submitHandler.bind(this);
+        this.updateHandler=this.updateHandler.bind(this);
+        // this.getSouvenirNameList = this.getSouvenirNameList.bind(this);
+        // this.getSouvenirDetail = this.getSouvenirDetail.bind(this);
         this.addRow = this.addRow.bind(this);
         this.rowHandleChange = this.rowHandleChange.bind(this);
         this.deleteRow = this.deleteRow.bind(this);
@@ -51,11 +51,12 @@ class CreateTSouvenir extends Component{
     resetForm() {
         this.setState({
             formdata:{
+                code:'',
                 received_by: '',
                 name_receiver: '',
                 received_date: '',
                 note: '',
-                formdataStock : [{
+                DetailSouvenir : [{
                     id     :  "",
                     m_souvenir_id: "",
                     qty     :  "",
@@ -64,29 +65,6 @@ class CreateTSouvenir extends Component{
             },
             errors: {}
         });
-    };
-
-    async autoGenSouvenir() {
-        var userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
-
-        var reqby = "";
-        if(userdata == null || typeof userdata == undefined)
-        {
-            reqby = "";
-        }else{
-            reqby = userdata[0].employee;
-        }
-
-        let result = await AutoGen.createCodeTSouvenir();
-        console.log("autoGenSupplier");
-        console.log(result);
-
-        let tmp = this.state.formdata;
-        tmp.code = result;
-
-        this.setState({
-            formdata: tmp
-        })
     };
 
     textChanged(e) {
@@ -105,37 +83,6 @@ class CreateTSouvenir extends Component{
             receivedDate: date
         });
         console.log(this.state.receivedDate)
-    };
-
-    handleValidation(){
-        let fields = this.state.formdata;
-        let field = this.state;
-        let ms = this.state.msouvenir;
-        let errors = {};
-        let formIsValid = true;
-        
-        if(typeof fields.received_by === "undefined" || fields.received_by === null || fields.received_by === ""){
-            formIsValid = false;
-            errors.err_received_by = "Employee Name is empty!";
-        }
-
-        if(typeof field.receivedDate === "undefined" || field.receivedDate === null || field.receivedDate === ""){
-            formIsValid = false;
-            errors.err_receivedDate = "Received Date is empty!";
-        }
-
-        // if(typeof ms.name === "undefined" || ms.name === null || ms.name === ""){
-        //     formIsValid = false;
-        //     errors.err_name = "Souvenir Name is empty!";
-        // }
-
-        // if(typeof ms.quantity === "undefined" || ms.quantity === null || ms.quantity === ""){
-        //     formIsValid = false;
-        //     errors.err_quantity = "Souvenir Name is empty!";
-        // }
-
-        this.setState({errors: errors});
-        return formIsValid;
     };
 
     async GetAllEmployee() {
@@ -174,10 +121,104 @@ class CreateTSouvenir extends Component{
         }
     };
 
+    // async getSouvenirDetail(id) {
+    //     let result = await tsouvenirapi.GetSouvenirItem(id);
+    //     let currSouvenir = {};
+
+    //     if(result.status === 200)
+    //     {
+    //         console.log('Souvenir - Edit.js Debugger');
+    //         console.log("getTSouvenirBySouvenirId");
+    //         console.log(result.message);
+
+    //         result.message.map((ele) => {
+    //             currSouvenir = ele;
+    //         });
+
+    //         this.setState({
+    //             formdata: currSouvenir
+    //         });
+    //     }
+    //     else
+    //     {
+    //         console.log(result.message);
+    //     }
+    // }
+
+    componentDidMount(){
+        this.GetAllEmployee();
+        this.GetAllMSouvenir();
+        //this.getSouvenirDetail();
+        // this.getSouvenirNameList();
+    };
+
+    handleValidation(){
+        let fields = this.state.formdata;
+        let field = this.state;
+        let ms = this.state.msouvenir;
+        let errors = {};
+        let formIsValid = true;
+        
+        if(typeof fields.received_by === "undefined" || fields.received_by === null || fields.received_by === ""){
+            formIsValid = false;
+            errors.err_received_by = "Employee Name is empty!";
+        }
+
+        // if(typeof field.receivedDate === "undefined" || field.receivedDate === null || field.receivedDate === ""){
+        //     formIsValid = false;
+        //     errors.err_receivedDate = "Received Date is empty!";
+        // }
+
+        // if(typeof ms.name === "undefined" || ms.name === null || ms.name === ""){
+        //     formIsValid = false;
+        //     errors.err_name = "Souvenir Name is empty!";
+        // }
+
+        // if(typeof ms.quantity === "undefined" || ms.quantity === null || ms.quantity === ""){
+        //     formIsValid = false;
+        //     errors.err_quantity = "Souvenir Name is empty!";
+        // }
+
+        this.setState({errors: errors});
+        return formIsValid;
+    };
+
+    async updateHandler(){
+
+        console.log("Test")
+        console.log(this.state.receivedDate._d)
+
+        if(this.handleValidation()){
+            let token = localStorage.getItem(appconfig.secure_key.token);
+            console.log("Debug add stock souvenir");
+            console.log(this.state.formdata);
+
+            var userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
+
+            let result = await tsouvenirapi.Update(this.state.formdata, this.state.receivedDate._d);
+            
+            if(result.status === 200)
+            {
+                console.log('Souvenir - Index.js Debugger');
+                console.log(result.message);
+                var scode = this.state.formdata.code
+                document.getElementById("hidePopUpBtn").click();
+                this.props.modalStatus(3, 'Success', scode);
+            } 
+            else 
+            {
+                console.log('Failed Create Stock Souvenir - Index.js Debugger');
+                console.log(result.message);
+                document.getElementById("hidePopUpBtn").click();
+                this.props.modalStatus(0, 'Failed');
+            }
+        }
+    };
+
     rowHandleChange = index => e => {
         const { name, value } = e.target;
         var currStock = this.state.formdata;
-        var stock = currStock.formdataStock.find(o => o.id === index);
+        var stock = currStock.DetailSouvenir.find(o => o.id === index);
         stock[name] = value;
 
         this.setState({
@@ -192,8 +233,8 @@ class CreateTSouvenir extends Component{
 
     deleteRow(index){
         var currStock =this.state.formdata;
-        const selectIdx = currStock.formdataStock.findIndex(u => u.id === index);
-        currStock.formdataStock.splice(selectIdx, 1);
+        const selectIdx = currStock.DetailSouvenir.findIndex(u => u.id === index);
+        currStock.DetailSouvenir.splice(selectIdx, 1);
         this.setState({
             formdata: currStock
         });
@@ -211,67 +252,24 @@ class CreateTSouvenir extends Component{
             note: ''
         };
 
-        currStock.formdataStock.push(newStock);
+        currStock.DetailSouvenir.push(newStock);
         this.setState({
             formdata: currStock
         });
     };
 
-    componentDidMount(){
-        this.autoGenSouvenir();
-        this.GetAllEmployee();
-        this.GetAllMSouvenir();
-    };
-
-    async submitHandler(){
-
-        console.log("Test")
-        console.log(this.state.receivedDate._d)
-
-        if(this.handleValidation()){
-            let token = localStorage.getItem(appconfig.secure_key.token);
-            console.log("Debug add stock souvenir");
-            console.log(this.state.formdata);
-
-            var userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
-
-            let result = await tsouvenirapi.insertNew(this.state.formdata, this.state.receivedDate._d);
-            
-            if(result.status === 200)
-            {
-                console.log('Souvenir - Index.js Debugger');
-                console.log(result.message);
-                var scode = this.state.formdata.code
-                document.getElementById("hidePopUpBtn").click();
-                this.props.modalStatus(2, 'Success', scode);
-            } 
-            else 
-            {
-                console.log('Failed Create Stock Souvenir - Index.js Debugger');
-                console.log(result.message);
-                document.getElementById("hidePopUpBtn").click();
-                this.props.modalStatus(0, 'Failed');
-            }
-            this.autoGenSouvenir();
-        }
-    };
-
-    // async getDetailSouvenir(id) {
-    //     let result = await tsouvenirapi.GetSouvenirItem(id);
-    //     let currSouv = {};
+    // async getSouvenirNameList(){
+    //     let result = await tsouvenirapi.GetListSouvenirName();
 
     //     if(result.status === 200)
     //     {
-    //         console.log('Transaction Item Souvenir - Create.js Debugger');
-    //         console.log("getDetailSouvenir");
+    //         console.log('Souvenir - edit.js Debugger');
+    //         console.log("getSouvenirNameList");
+    //         console.log(result);
     //         console.log(result.message);
 
-    //         result.message.map((ele) => {
-    //             currSouv = ele;
-    //         });
-
     //         this.setState({
-    //             formdata: currSouv
+    //             SouvenirNameList: result.message
     //         });
     //     }
     //     else
@@ -279,16 +277,24 @@ class CreateTSouvenir extends Component{
     //         console.log(result.message);
     //     }
     // }
+
+    componentWillReceiveProps(newProps) {
+        console.log(newProps);
+        this.setState({
+            formdata : newProps.tsouvenir
+        });
+    }
+
     render(){
+        // const { categories } = this.state;
         console.log("this.state.formdata");
         console.log(this.state.formdata);
         return(
             <div className="modal-content">
                 <div className="modal-header">
-                    <button id="hidePopUpBtn" onClick = { this.resetForm } type="button" className="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 className="modal-title" >Add Souvenir Stock</h4>
+                <button id="hidePopUpBtnUpdt" type="button" className="close" data-dismiss="modal" aria-label="Close" onClick = { this.resetForm }>
+                <span aria-hidden="true">&times;</span></button>
+                <h4 className="modal-title">Edit Souvenir Stock - {this.props.tsouvenir.code}</h4>
                 </div>
 
                 <div className="modal-body">
@@ -297,7 +303,7 @@ class CreateTSouvenir extends Component{
                             <div className="form-group">
                                 <p className="col-sm-3 control-label">*Transaction Code</p>
                                 <div className="col-sm-4">
-                                    <input ref="code" type="text" className="form-control" name="code" placeholder="Auto Generate" value={ this.state.formdata.code } disabled />
+                                    <input type="text" class="form-control" value={this.props.tsouvenir.code} disabled/>
                                     <span style={{color: "red"}}>{this.state.errors.code}</span>
                                 </div> 
                             </div>
@@ -323,8 +329,9 @@ class CreateTSouvenir extends Component{
                                 <div className="input-group date">
                                 
                                     <DatePicker
-                                        selected={this.state.receivedDate}
-                                        onChange={this.handleChangeDateRcBy}
+                                        selected={this.props.receivedDate}
+                                        onChange={this.props.handleChangeDateRcBy}
+                                        value={this.props.tsouvenir.received_date}
                                         className="form-control pull-right"
                                         fixedHeight
                                         dateFormat="DD-MM-YYYY"
@@ -379,21 +386,22 @@ class CreateTSouvenir extends Component{
                                         </thead>
                                         <tbody>
                                             { 
-                                                this.state.formdata.formdataStock.map((ele,x)=>
+                                                this.state.formdata.DetailSouvenir && this.state.formdata.DetailSouvenir.map((ele, x) =>
                                                     <tr id="addr0" key={ele._id}>
                                                         <td>{x+1}</td>
                                                         <td>
                                                             <select
                                                             className="form-control" 
                                                             name="m_souvenir_id" 
-                                                            value={this.state.formdata.formdataStock[x].m_souvenir_id}
+                                                            value={this.state.formdata.DetailSouvenir[x].m_souvenir_id}
                                                             onChange={this.rowHandleChange(ele.id)}>
                                                                 <option value="">Select Souvenir</option>
                                                                 {
                                                                     this.state.msouvenir.map((elemen) =>
-                                                                        <option key={ elemen.name } value={ elemen._id }> { elemen.name } </option>
+                                                                        <option key={ elemen.name } value={ elemen.name }> { elemen.name } </option>
                                                                     )
                                                                 }
+                                                            
                                                             </select>
                                                         </td>
                                                         
@@ -401,7 +409,7 @@ class CreateTSouvenir extends Component{
                                                             <input
                                                             type="number"
                                                             name="qty"
-                                                            value={this.state.formdata.formdataStock[x].qty}
+                                                            value={this.state.formdata.DetailSouvenir[x].qty}
                                                             onChange={this.rowHandleChange(ele.id)}
                                                             className="form-control"
                                                             />
@@ -411,7 +419,7 @@ class CreateTSouvenir extends Component{
                                                             <input
                                                             type="text"
                                                             name="note"
-                                                            value={this.state.formdata.formdataStock[x].note}
+                                                            value={this.state.formdata.DetailSouvenir[x].note}
                                                             onChange={this.rowHandleChange(ele.id)}
                                                             className="form-control"
                                                             />
@@ -436,7 +444,7 @@ class CreateTSouvenir extends Component{
 
                 <div className="modal-footer">
                     <button type="button" onClick={ this.resetForm } className="btn btn-warning pull-right" data-dismiss="modal" style={{marginRight : '5px'}}>Cancel</button>
-                    <button type="button" onClick={ this.submitHandler } className="btn btn-primary" style={{marginRight : '5px'}}>Save</button>
+                    <button type="button" onClick={ this.updateHandler } className="btn btn-primary" style={{marginRight : '5px'}}>Update</button>
                 </div>
             </div>
         )
@@ -444,4 +452,4 @@ class CreateTSouvenir extends Component{
 
 
 };
-export default CreateTSouvenir;
+export default EditTSouvenir;

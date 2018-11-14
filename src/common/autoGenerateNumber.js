@@ -103,7 +103,7 @@ const AutoGen = {
                     console.log(lastcode)
                     console.log(lastcode.substring(10,15))
                     
-                    let str = "TSRV"+lastcode.substring(4,10);
+                    let str = "TRSV"+lastcode.substring(4,10);
                     
                     console.log("STR" + str);
                     let lastnum = lastcode.substring(10,15);

@@ -5,7 +5,8 @@
         "employee" : "/api/employee/",
         "msouvenir" : "/api/souvenir/",
         "unit" : "/api/unit/",
-        "tsouvenir": "/api/tsouvenir/"
+        "tsouvenir": "/api/tsouvenir/",
+        "souvenir_item":"/api/tsitem/"
     },
     "secure_key" : {
         "userdata" : "SECURE_KEY_USERDATA",
