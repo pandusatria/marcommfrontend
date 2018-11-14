@@ -3,10 +3,14 @@ import { AlertList } from 'react-bs-notifier';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
+import appconfig from '../../config/app.config.json';
 
 import souvenir_item_api from '../../handler/souvenir_item';
 
 import CreateRequest from './create';
+import ApprovalRequest from './approval';
+import EditRequest from './edit';
+import ReceivedRequest from './received'
 
 class index extends Component {
     constructor(props) {
@@ -21,7 +25,27 @@ class index extends Component {
             request_date : '',
             due_date : '',
             created_date : '',
-            souvenir_item : []
+            souvenir_item : [],
+            alertData: {
+                status: 99,
+                message: '',
+                code: ''
+            },
+            currentSouvenir: {},
+            souvenir: [],
+            alerts : [],
+        }
+
+        this.userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
+
+        if(this.userdata == null || typeof this.userdata == undefined) {
+            this.username = "";
+            this.role = "";
+            this.employee = "";
+        } else {
+            this.username = this.userdata[0].username;
+            this.role = this.userdata[0].role;
+            this.employee = this.userdata[0].employee;
         }
 
         this.GetAll = this.GetAll.bind(this);
@@ -30,6 +54,10 @@ class index extends Component {
         this.duedateChange = this.duedateChange.bind(this);
         this.createddateChange = this.createddateChange.bind(this);
         this.search = this.search.bind(this);
+        this.modalStatus = this.modalStatus.bind(this);
+        this.onAlertDismissed = this.onAlertDismissed.bind(this);
+        this.editModalHandler = this.editModalHandler.bind(this);
+        this.receivedModalHandler = this.receivedModalHandler.bind(this);
     };
 
     textChange(e) {
@@ -204,6 +232,98 @@ class index extends Component {
         }
     };
 
+    modalStatus(status, message, code){
+        this.GetAll();
+        this.setState({
+            alertData : {
+                status : status,
+                message : message,
+                code : code
+            }
+        });
+        if(status === 0){
+            this.setState({
+                alerts : [{
+                    type: "danger",
+                    message: message
+                }]
+            });
+        } else if(status === 1){
+            // insert
+            this.setState({
+                alerts : [{
+                    type: "info",
+                    message: "Data Saved! Transaction Souvenir Request has been add with code " + code
+                }]
+            });
+        } else if(status === 2){
+            // edit
+            this.setState({
+                alerts : [{
+                    type: "info",
+                    message: "Data Updated! Transaction Souvenir Request with code " + code + " has been updated!"
+                }]
+            });
+        } else if(status === 3){
+            // aprove
+            this.setState({
+                alerts : [{
+                    type: "info",
+                    message: message
+                }]
+            });
+        }
+    };
+
+    onAlertDismissed(alert){
+        const alerts = this.state.alerts;
+        const idx = alerts.indexOf(alert); // buat array
+        console.log(idx);
+        if(idx >= 0){
+            this.setState({
+                alerts: [...alerts.slice(0, idx), ...alerts.slice(idx+1)]
+            });
+        }
+    };
+
+    editModalHandler(id) {
+        var tmp = {};
+
+        this.state.souvenir_item.map((ele) => {
+            if(ele._id === id) {
+                tmp = ele
+            }
+        });
+
+        this.setState({
+            currentSouvenir: tmp
+        });
+
+        console.log("this.state.souveniritem");
+        console.log(this.state.souvenir_item);
+        console.log("tmp");
+        console.log(tmp);
+    };
+
+    receivedModalHandler(id) {
+        var tmp = {};
+
+        this.state.souvenir_item.map((ele) => {
+            if(ele._id === id) {
+                tmp = ele
+            }
+        });
+
+        this.setState({
+            currentSouvenir: tmp
+        });
+
+        console.log("this.state.souveniritem");
+        console.log(this.state.souvenir_item);
+        console.log("tmp");
+        console.log(tmp);
+    };
+
     componentDidMount() {
         this.GetAll();
     }
@@ -225,12 +345,12 @@ class index extends Component {
                     </ol>
                 </div>
 
-                {/* {
+                {
                     (this.state.alertData.status === 1 || this.state.alertData.status === 2 || this.state.alertData.status === 3) ? <AlertList alerts={this.state.alerts} timeout={4000} onDismiss={this.onAlertDismissed.bind(this)} /> : ''
                 }
                 {
                     (this.state.alertData.status === 0) ? <AlertList alerts={this.state.alerts} timeout={4000} onDismiss={this.onAlertDismissed.bind(this)} /> : ''
-                } */}
+                }
                 
                 <section className="content">
                     <div className="row">
@@ -342,10 +462,10 @@ class index extends Component {
                                                     <tr key={x}> 
 
                                                         <td> { x+1 } </td>
-                                                        <td> { elemen.transaction_code } </td>
+                                                        <td> { elemen.code } </td>
                                                         <td> { elemen.request_by } </td>
                                                         <td> { elemen.request_date } </td>
-                                                        <td> { elemen.due_date } </td>
+                                                        <td> { elemen.request_due_date } </td>
                                                         <td> 
                                                             { 
                                                                 (elemen.status === 1) ? "Submitted" :
@@ -361,7 +481,21 @@ class index extends Component {
                                                         <td> { elemen.created_by } </td>
                                                         <td>
                                                             <button className="btn btn-default" onClick={ () => {this.detailModalHandler(elemen._id)}} type="button" data-toggle="modal" data-target="#modal-detail" style={{ marginRight : '5px'}}> <i className="fa fa-search"></i> </button>
-                                                            <button className="btn btn-default" onClick={ () => {this.editModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-edit" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                            {
+                                                                ( elemen.status === 1 && this.employee === elemen.request_by ) ?
+                                                                    <button className="btn btn-default" onClick={ () => {this.editModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-edit" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                                :
+                                                                ( elemen.status === 2 && this.role === "Requester"  && this.employee === elemen.request_by ) ?
+                                                                    <button className="btn btn-default" onClick={ () => {this.receivedModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-request" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                                :
+                                                                ( elemen.status === 2 || elemen.status === 0 ) ?
+                                                                    <button className="btn btn-default" disabled onClick={ () => {this.editModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-edit" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                                :
+                                                                ( elemen.status === 3 ) ?
+                                                                    <button className="btn btn-default" disabled onClick={ () => {this.editModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-edit" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                                :
+                                                                    <button className="btn btn-default" onClick={ () => {this.editModalHandler(elemen._id)} } type="button" data-toggle="modal" data-target="#modal-edit" style={{ marginRight : '5px'}}> <i className="fa fa-pencil"></i> </button>
+                                                            }
                                                         </td>
                                                     </tr>
                                                 )
@@ -377,37 +511,43 @@ class index extends Component {
                 <div className="modal fade" id="modal-create">
                     <div className="modal-dialog">
                         <CreateRequest 
-                            
+                            modalStatus = { this.modalStatus }
                         />
                     </div>
                 </div>
 
-                {/* <div className="modal fade" id="modal-detail">
-                    <div className="modal-dialog">
-                        <DetailUser 
-                            modalStatus = { this.modalStatus }
-                            detailUser = { this.state.currentUser }
-                        />
+                {
+                    ( this.role === "Requester" ) ?
+                    <div className="modal fade" id="modal-edit">
+                        <div className="modal-dialog">
+                            <EditRequest 
+                                modalStatus = { this.modalStatus }
+                                souvenirRequest = { this.state.currentSouvenir }
+                            />
+                        </div>
                     </div>
-                </div>
+                    :
+                    ( this.role === "Administrator" ) ?
+                    <div className="modal fade" id="modal-edit">
+                        <div className="modal-dialog">
+                            <ApprovalRequest 
+                                modalStatus = { this.modalStatus }
+                                souvenirRequest = { this.state.currentSouvenir }
+                            />
+                        </div>
+                    </div>
+                    :
+                    ''
+                }
 
-                <div className="modal fade" id="modal-edit">
-                    <div className="modal-dialog">
-                        <EditUser 
-                            modalStatus = { this.modalStatus }
-                            editUser = { this.state.currentUser }
-                        />
-                    </div>
+                <div className="modal fade" id="modal-request">
+                        <div className="modal-dialog">
+                            <ReceivedRequest 
+                                modalStatus = { this.modalStatus }
+                                souvenirRequest = { this.state.currentSouvenir }
+                            />
+                        </div>
                 </div>
-
-                <div className="modal fade" id="modal-delete">
-                    <div className="modal-dialog">
-                        <DeleteUser 
-                            modalStatus = { this.modalStatus }
-                            deleteUser = { this.state.currentUser }
-                        />
-                    </div>
-                </div> */}
 
             </div>
         )

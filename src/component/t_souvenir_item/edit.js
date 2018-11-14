@@ -4,153 +4,56 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 
-import AutoGen from '../../common/autoGenerateNumber';
-
 import souveniritemapi from '../../handler/souvenir_item';
-import eventapi from '../../handler/eevent';
 import souvenirapi from '../../handler/msouvenir';
 
-class creatRequest extends Component {
+class editRequest extends Component {
     idx = 0;
     constructor(props) {
         super(props);
         this.state = {
             formdataSouvenir: {
+                _id: '',
                 code: '',
+                type: '',
                 t_event_id: '',
                 request_by: '',
                 request_date: '',
                 request_due_date: '',
+                approved_by: '',
+                approved_date: '',
+                received_by: '',
+                received_date: '',
+                settlement_by: '',
+                settlement_date: '',
+                settlement_approved_by: '',
+                settlement_approved_date: '',
+                status: '',
                 note: '',
-                formdataRequest: [{
-                    id: '',
+                reject_reason: '',
+                is_delete: '',
+                created_by: '',
+                created_date: '',
+                detail_souvenir: [{
+                    _id: '',
+                    t_souvenir_id: '',
                     m_souvenir_id: '',
                     qty: '',
-                    note: ''
+                    qty_settlement: '',
+                    note: '',
+                    is_delete: '',
+                    created_by: '',
+                    created_date: '',
+                    updated_by: '',
+                    updated_date: '',
                 }]
             },
-            due_date: '',
-            event: [],
-            errors: {},
             souvenir: []
         };
-        this.textChanged = this.textChanged.bind(this);
-        this.dateChange = this.dateChange.bind(this);
-        this.resetForm = this.resetForm.bind(this);
-        this.autoGenSouvenir = this.autoGenSouvenir.bind(this);
-        this.getEvent = this.getEvent.bind(this);
         this.getSouvenir = this.getSouvenir.bind(this);
-        this.handleValidation = this.handleValidation.bind(this);
-        this.submitHandler = this.submitHandler.bind(this);
-        this.addRow = this.addRow.bind(this);
+        this.updateHandler = this.updateHandler.bind(this);
         this.rowHandleChange = this.rowHandleChange.bind(this);
-        this.deleteRow = this.deleteRow.bind(this);
-    };
-
-    resetForm() {
-        this.setState({
-            formdataSouvenir: {
-                t_event_id: '',
-                request_due_date: '',
-                note: '',
-                formdataRequest: [{
-                    id: '',
-                    m_souvenir_id: '',
-                    qty: '',
-                    note: ''
-                }]
-            },
-            due_date: '',
-            errors: {}
-        });
-    };
-
-    
-    async autoGenSouvenir() {
-        var userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
-
-        var reqby = "";
-        if(userdata == null || typeof userdata == undefined)
-        {
-            reqby = "";
-        }else{
-            reqby = userdata[0].employee;
-        }
-
-        let result = await AutoGen.createCodeTSouvenir();
-        console.log("autoGenSupplier");
-        console.log(result);
-
-        let tmp = this.state.formdataSouvenir;
-        tmp.code = result;
-        tmp.request_by = reqby;
-        tmp.request_date = moment().format("DD-MM-YYYY");
-
-        this.setState({
-            formdataSouvenir: tmp
-        })
-    };
-
-    textChanged(e) {
-        let tmp = this.state.formdataSouvenir;
-        tmp[e.target.name] = e.target.value;
-        this.setState({
-            formdataSouvenir: tmp
-        });
-        console.log(this.state.formdataSouvenir);
-    };
-
-    dateChange(date) {
-        let tmp = this.state.formdataSouvenir;
-        this.setState({
-            formdata: tmp,
-            due_date: date
-        });
-        console.log(this.state.due_date);
-    };
-
-    handleValidation() {
-        let fields = this.state.formdataSouvenir;
-        let errors = {};
-        let formIsValid = true;
-
-        if(!fields.code) {
-            formIsValid = false;
-            errors.code = "transaction code cannnot be empty";
-        }
-
-        if(!fields.t_event_id) {
-            formIsValid = false;
-            errors.t_event_id = "dont forget to select event";
-        }
-
-        if(!fields.request_by) {
-            formIsValid = false;
-            errors.request_by = "request by cannnot be empty";
-        }
-
-        if(!fields.request_date) {
-            formIsValid = false;
-            errors.t_event_id = "request date cannot be empty";
-        }
-        
-
-        this.setState({  errors : errors });
-        return formIsValid;
-    };
-
-    async getEvent() {
-        let result = await eventapi.GetAll();
-
-        if(result.status === 200) {
-            console.log('create.js Debugger success catching event');
-            console.log(result.message);
-            this.setState({
-                event: result.message
-            });
-        } else {
-            console.log(result.message);
-        }
+        this.addRow = this.addRow.bind(this);
     };
 
     async getSouvenir() {
@@ -167,10 +70,47 @@ class creatRequest extends Component {
         }
     };
 
+    componentWillReceiveProps(newProps){
+        console.log("URGENT!!!!!!!!");
+        this.setState({
+            formdataSouvenir: newProps.souvenirRequest
+        });
+
+        console.log("inject succesfully");
+        
+        console.log(newProps.souvenirRequest);
+    };
+
+    async updateHandler() {
+        let token = localStorage.getItem(appconfig.secure_key.token);
+        
+       //let result = await souveniritemapi.insertApproved(this.state.formdataSouvenir);
+
+       let result = {
+           status: 200,
+           data: this.state.formdataSouvenir.detail_souvenir
+       }
+
+       if(result.status === 200) {
+            console.log("berhasil input data approved...");
+            document.getElementById("hidePopUpBtnEdit").click();
+            this.props.modalStatus(2, 'Success', this.props.souvenirRequest.code);
+            alert(result);
+        } else {
+            console.log("gagal input data...");
+            document.getElementById("hidePopUpBtnEdit").click();
+            this.props.modalStatus(0, 'Failed');
+        }
+    };
+
+    componentDidMount() {
+        this.getSouvenir();
+    };
+
     rowHandleChange = index => e => {
         const { name, value } = e.target;
         var currRequest = this.state.formdataSouvenir;
-        var request = currRequest.formdataRequest.find(o => o.id === index);
+        var request = currRequest.detail_souvenir.find(o => o.id === index);
         request[name] = value;
 
         this.setState({
@@ -185,8 +125,8 @@ class creatRequest extends Component {
 
     deleteRow(index){
         var currRequest =this.state.formdataSouvenir;
-        const selectIdx = currRequest.formdataRequest.findIndex(u => u.id === index);
-        currRequest.formdataRequest.splice(selectIdx, 1);
+        const selectIdx = currRequest.detail_souvenir.findIndex(u => u.id === index);
+        currRequest.detail_souvenir.splice(selectIdx, 1);
         this.setState({
             formdataSouvenir: currRequest
         });
@@ -204,54 +144,31 @@ class creatRequest extends Component {
             note: ''
         };
 
-        currRequest.formdataRequest.push(newRequest);
+        currRequest.detail_souvenir.push(newRequest);
         this.setState({
             formdataSouvenir: currRequest
         });
     };
 
-    componentDidMount(){
-        this.autoGenSouvenir();
-        this.getEvent();
-        this.getSouvenir();
-    }
-
-    async submitHandler() {
-
-        if(this.handleValidation()) {    
-            let token = localStorage.getItem(appconfig.secure_key.token);
-            console.log("Debug add request souvenir");
-            console.log(this.state.formdataSouvenir);
-
-            var userdata = JSON.parse(localStorage.getItem(appconfig.secure_key.userdata));
-
-            let result = await souveniritemapi.insert(this.state.formdataSouvenir, this.state.due_date, userdata[0]._id);
-
-            if(result.status === 200) {
-                console.log("berhasil input data...");
-                var code = this.state.formdataSouvenir.code;
-                document.getElementById("hidePopUpBtnAdd").click();
-                this.props.modalStatus(1, 'Success', code);
-            } else {
-                console.log("gagal input data...");
-                document.getElementById("hidePopUpBtnAdd").click();
-                this.props.modalStatus(0, 'Failed');
-            }
-
-            this.autoGenSouvenir();
+    render() {
+        if(this.state.formdataSouvenir.detail_souvenir === 'undefined')
+        {
+            console.log("xxxxx False");
+        }
+        else
+        {
+            console.log("xxxxx True");
+            console.log(this.state.souvenir_detail);
         }
 
-    }
-
-    render() {
         console.log("this.state.formdataSouvenir");
         console.log(this.state.formdataSouvenir);
         return(
             <div className="modal-content">
                 <div className="modal-header">
-                    <button id="hidePopUpBtnAdd" type="button" onClick={ this.resetForm } className="close" data-dismiss="modal" aria-label="Close">
+                    <button id="hidePopUpBtnEdit" type="button" onClick={ this.resetForm } className="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                    <h4 className="modal-title">Add Souvenir Request</h4>
+                    <h4 className="modal-title">Edit Souvenir Request - {this.state.formdataSouvenir.code}</h4>
                 </div>
                
                 <div className="modal-body">
@@ -264,22 +181,13 @@ class creatRequest extends Component {
                                         <p className="col-sm-4 control-label"> *Transaction Code</p>
                                         <div className="col-sm-8">
                                             <input type="text" disabled ref="transaction_code" style= {{ marginTop : '10px'}} className="form-control" name="transaction_code" placeholder="masukan transaction code" value={ this.state.formdataSouvenir.code }  onChange={ this.textChanged }></input>
-                                            <span style={{color: "red"}}>{this.state.errors.code}</span>
                                         </div>
                                     </div>
 
                                     <div className="form-group">
                                         <p className="col-sm-4 control-label"> *Event Code </p>
                                         <div className="col-sm-8">
-                                        <select style= {{ marginTop : '10px'}} className="form-control" name="t_event_id" value={ this.state.formdataSouvenir.t_event_id } onChange={ this.textChanged }>
-                                            <option value="">Select Event</option>
-                                            {
-                                                this.state.event.map((elemen) =>
-                                                    <option key={ elemen._id } value={ elemen._id }> { elemen.event_name } </option>
-                                                )
-                                            }
-                                        </select>
-                                        <span style={{color: "red"}}>{this.state.errors.t_event_id}</span>
+                                            <input type="text" disabled style= {{ marginTop : '10px'}} className="form-control" name="t_event_id" value={ this.state.formdataSouvenir.t_event_id }  onChange={ this.textChanged }></input>
                                         </div>
                                     </div>
 
@@ -287,7 +195,6 @@ class creatRequest extends Component {
                                         <p className="col-sm-4 control-label"> *Request By</p>
                                         <div className="col-sm-8">
                                             <input type="text" disabled ref="request_by" style= {{ marginTop : '10px'}} className="form-control" name="request_by" value={ this.state.formdataSouvenir.request_by } placeholder="masukan pe request"  onChange={ this.textChanged }></input>
-                                            <span style={{color: "red"}}>{this.state.errors.request_by}</span>
                                         </div>
                                     </div>
 
@@ -295,27 +202,13 @@ class creatRequest extends Component {
                                         <p className="col-sm-4 control-label"> *Request Date</p>
                                         <div className="col-sm-8">
                                             <input type="text" disabled ref="request_date" style= {{ marginTop : '10px'}} className="form-control" name="request_date" value={ this.state.formdataSouvenir.request_date } placeholder="masukan request date"  onChange={ this.textChanged }></input>
-                                            <span style={{color: "red"}}>{this.state.errors.request_date}</span>
                                         </div>
                                     </div>
 
                                     <div className="form-group">
                                         <p className="col-sm-4 control-label"> *Due Date</p>
                                         <div className="col-sm-8">
-                                                <div className="input-group date">
-                                                    <DatePicker
-                                                        selected={this.state.due_date}
-                                                        onChange={this.dateChange}
-                                                        className="form-control pull-right"
-                                                        fixedHeight
-                                                        dateFormat="DD-MM-YYYY"
-                                                        id="datepicker"
-                                                        name="request_due_date"
-                                                        showMonthDropdown
-                                                        showYearDropdown
-                                                        placeholderText = "Date">
-                                                    </DatePicker>
-                                                </div>
+                                            <input type="text" ref="request_due_date" style= {{ marginTop : '10px'}} className="form-control" name="request_due_date" value={ this.state.formdataSouvenir.request_due_date } placeholder="masukan request date"  onChange={ this.textChanged }></input>
                                         </div>
                                     </div>
 
@@ -323,6 +216,26 @@ class creatRequest extends Component {
                                         <p className="col-sm-4 control-label"> *Note</p>
                                         <div className="col-sm-8">
                                             <textarea ref="note" style= {{ marginTop : '10px'}} className="form-control" name="note" value={ this.state.formdataSouvenir.note } placeholder="Type Note"  onChange={ this.textChanged }/>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <p className="col-sm-4 control-label"> *Status</p>
+                                        <div className="col-sm-8">
+                                            <input type="text" disabled ref="request_due_date" style= {{ marginTop : '10px'}} className="form-control" name="request_due_date" 
+                                            value={ 
+                                                this.state.formdataSouvenir.status === 1 ? "Submitted" :
+                                                this.state.formdataSouvenir.status === 2 ? "In Progress" :
+                                                this.state.formdataSouvenir.status === 3 ? "Received by Requester" :
+                                                this.state.formdataSouvenir.status === 4 ? "Settlement" :
+                                                this.state.formdataSouvenir.status === 5 ? "Settlement Apporved" :
+                                                this.state.formdataSouvenir.status === 6 ? "Close Request" :
+                                                this.state.formdataSouvenir.status === 0 ? "Rejected" :
+                                                ''
+                                            } 
+                                            placeholder="masukan request date"  
+                                            onChange={ this.textChanged }>
+                                            </input>
                                         </div>
                                     </div>
 
@@ -351,15 +264,23 @@ class creatRequest extends Component {
                                             </thead>
                                             <tbody>
                                                 { 
-                                                    this.state.formdataSouvenir.formdataRequest.map((ele,x)=>
-                                                        <tr id="addr0" key={ele._id}>
-                                                            <td>{x+1}</td>
+                                                    (this.props.souvenirRequest.detail_souvenir === 'undefined')?
+                                                    <tr>
+                                                        <td> undefined</td>
+                                                        <td> undefined </td>
+                                                        <td> undefined</td>
+                                                        <td> undefined </td>
+                                                    </tr>
+                                                    :
+                                                    this.state.formdataSouvenir.detail_souvenir && this.state.formdataSouvenir.detail_souvenir.map((elemen, x) =>
+                                                        <tr key={x}> 
+                                                            <td> { x+1 } </td>
                                                             <td>
                                                                 <select
                                                                 className="form-control" 
                                                                 name="m_souvenir_id" 
-                                                                value={this.state.formdataSouvenir.formdataRequest[x].m_souvenir_id}
-                                                                onChange={this.rowHandleChange(ele.id)}>
+                                                                value={this.state.formdataSouvenir.detail_souvenir[x].m_souvenir_id}
+                                                                onChange={this.rowHandleChange(elemen.id)}>
                                                                     <option value="">Select Souvenir</option>
                                                                     {
                                                                         this.state.souvenir.map((elemen) =>
@@ -372,8 +293,8 @@ class creatRequest extends Component {
                                                                 <input
                                                                 type="number"
                                                                 name="qty"
-                                                                value={this.state.formdataSouvenir.formdataRequest[x].qty}
-                                                                onChange={this.rowHandleChange(ele.id)}
+                                                                value={this.state.formdataSouvenir.detail_souvenir[x].qty}
+                                                                onChange={this.rowHandleChange(elemen.id)}
                                                                 className="form-control"
                                                                 />
                                                             </td>
@@ -381,16 +302,17 @@ class creatRequest extends Component {
                                                                 <input
                                                                 type="text"
                                                                 name="note"
-                                                                value={this.state.formdataSouvenir.formdataRequest[x].note}
-                                                                onChange={this.rowHandleChange(ele.id)}
+                                                                value={this.state.formdataSouvenir.detail_souvenir[x].note}
+                                                                onChange={this.rowHandleChange(elemen.id)}
                                                                 className="form-control"
                                                                 />
                                                             </td>
                                                             <td>
-                                                                <button type="button" className="btn btn-danger" onClick = {() => {this.deleteRow(ele.id)}}><i className="fa fa-trash"></i></button>
+                                                                <button type="button" className="btn btn-danger" onClick = {() => {this.deleteRow(elemen.id)}}><i className="fa fa-trash"></i></button>
                                                             </td>
                                                         </tr>
                                                     )
+                                                    
                                                 }
                                             </tbody>
                                         </table>
@@ -402,12 +324,13 @@ class creatRequest extends Component {
                     </form>
                 </div>
                 <div className="modal-footer">
-                    <button type="button" onClick={ this.submitHandler } className="btn btn-primary">Save changes</button>
-                    <button type="button" onClick={ this.resetForm } className="btn btn-warning pull-right" data-dismiss="modal">Close</button>
+                    <button type="button" onClick={ this.updateHandler } className="btn btn-primary">Update</button>
+                    <button type="button" className="btn btn-warning pull-right" data-dismiss="modal">Close</button>
                 </div>
             </div>
         ) 
     }
+
 };
 
-export default creatRequest;
+export default editRequest;

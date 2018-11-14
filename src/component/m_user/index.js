@@ -257,7 +257,7 @@ class index extends Component {
                 }]
             });
         }
-    }
+    };
 
     onAlertDismissed(alert){
         const alerts = this.state.alerts;

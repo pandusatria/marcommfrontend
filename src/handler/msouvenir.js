@@ -22,6 +22,28 @@ const msouvenirapi = {
         } catch(error) {
             return error.response.data;
         }
+    },
+
+    GetSelect : async() => {
+        let token = localStorage.getItem(appconfig.secure_key.token);
+        let option = {
+            url: appconfig.base_url + appconfig.endpoints.souvenir + "getselect",
+            method: 'GET',
+            headers: {
+                'Authorization' : token,
+                'Content-Type' : 'application/json'
+            }
+        }
+
+        console.log('Initialized Master Souvenir : GetSelect from frontend');
+
+        try {
+            let result = await axios(option);
+            console.log('Showing all Data Souvenir > 0');
+            return result.data;
+        } catch(error) {
+            return error.response.data;
+        }
     }
 }
 export default msouvenirapi;

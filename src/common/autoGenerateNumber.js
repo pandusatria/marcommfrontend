@@ -36,11 +36,10 @@ createCodeTSouvenir : async() => {
             console.log(data);
             if(data.length > 0)
             {
-                var tgl = moment().format("DDMMYY")
                 if(data[0].code === null || typeof data[0].code === "undefined")
                 {
 
-                    return "TRSV"+tgl+"00001";
+                    return "TRSV"+moment().format("DDMMYY")+"00001";
                     //return "TRSV27031800001";
                 }
                 else
@@ -66,7 +65,7 @@ createCodeTSouvenir : async() => {
             }
             else
             {
-                return "TRSV"+tgl+"00001";
+                return "TRSV"+moment().format("DDMMYY")+"00001";
             }
         }
         catch (error) 
